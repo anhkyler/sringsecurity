@@ -1,26 +1,28 @@
 package spring.security.learning.learningspringsecurity.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import lombok.AllArgsConstructor;
-import spring.security.learning.learningspringsecurity.config.security.filter.CustomAuthenticationFilter;
+import spring.security.learning.learningspringsecurity.config.filters.APIKeyFilter;
 
 @Configuration
 @AllArgsConstructor
-public class SecurityConfig  {
+public class SecurityConfig {
 
-	@Autowired
-	CustomAuthenticationFilter customAuthenticationFilter;
+	private String key = "test";
+
 	@Bean
-	SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
-		return httpSecurity
-                .addFilterAt(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .authorizeRequests(requests -> requests.anyRequest().authenticated())
-                .build();
-	}
+	SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+        return http.httpBasic()
+        		.and().addFilterBefore(new APIKeyFilter(key), BasicAuthenticationFilter.class)
+        		.authorizeRequests().anyRequest().authenticated().and()
+        		.build();
+    }
+	
+	
+	
 }
